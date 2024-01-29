@@ -1,5 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.mazaha1.ppsb.interfaces
+
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -48,10 +50,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.mazaha1.ppsb.Retro
-import com.mazaha1.ppsb.UserApi
-import com.mazaha1.ppsb.UserRequest
-import com.mazaha1.ppsb.UserResponse
+import com.mazaha1.ppsb.MainActivity
+import com.mazaha1.ppsb.api.model.AuthResponse
+import com.mazaha1.ppsb.api.model.AuthCredentials
+import com.mazaha1.ppsb.api.services.Server
 import com.mazaha1.ppsb.ui.theme.PPSBMAZAHATheme
 import retrofit2.Call
 import retrofit2.Callback
@@ -108,27 +110,38 @@ fun LoginForm() {
 
 fun checkCredentials(creds: Credentials, context: Context): Boolean {
     if (creds.isNotEmpty()) {
-        val req = UserRequest()
-        req.username = creds.login
-        req.password = creds.pwd
-        req.remember = creds.remember
+        val request = AuthCredentials(
+            username = creds.login,
+            password = creds.pwd,
+            remember = creds.remember
+        )
+        val auth = Server.auth
+        val call = auth.login(request)
+        call.enqueue(object : Callback<AuthResponse> {
+            override fun onResponse(call: Call<AuthResponse>, response: Response<AuthResponse>) {
+                if (response.isSuccessful) {
+                    // Tangani respons API yang berhasil
+                    val data = response.body()
+                    // Lakukan sesuatu dengan data respons, jika diperlukan
+                    Log.d("ApiResponse", "Response: $data")
 
-        val retro = Retro().getRetroClientInstance().create(UserApi::class.java)
-        retro.login(req).enqueue(object : Callback<UserResponse>{
-            override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                t.message?.let { Log.e("error", it) }
-                Log.d("data", "gagal")
+                    context.startActivity(Intent(context, MainActivity::class.java))
+                    (context as Activity).finish()
+
+                    Toast.makeText(context, "Sukses", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Tangani kesalahan dari API
+                    Log.e("ApiResponse", "Error: ${response.errorBody()?.string()}")
+
+                    // Tampilkan pesan kesalahan kepada pengguna, misalnya dengan Toast
+                    Toast.makeText(context, "Opps, login gagal", Toast.LENGTH_SHORT).show()
+                }
             }
 
-            override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
-                val res = response.body()
-                Log.d("data", res!!.token.toString())
-                Log.d("data", "sukses")
+            override fun onFailure(call: Call<AuthResponse>, t: Throwable) {
+                Log.e("ApiResponse", "Error: ${t.message}")
             }
-
         })
-//        context.startActivity(Intent(context, MainActivity::class.java))
-//        (context as Activity).finish()
         return true
     } else {
         Toast.makeText(context, "Wrong Credentials", Toast.LENGTH_SHORT).show()
