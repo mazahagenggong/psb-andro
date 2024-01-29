@@ -5,7 +5,7 @@ package com.mazaha1.ppsb.interfaces
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+//import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -123,7 +123,7 @@ fun checkCredentials(creds: Credentials, context: Context): Boolean {
                     // Tangani respons API yang berhasil
                     val data = response.body()
                     // Lakukan sesuatu dengan data respons, jika diperlukan
-                    Log.d("ApiResponse", "Response: $data")
+//                    Log.d("ApiResponse", "Response: $data")
 
                     context.startActivity(Intent(context, MainActivity::class.java))
                     (context as Activity).finish()
@@ -131,7 +131,7 @@ fun checkCredentials(creds: Credentials, context: Context): Boolean {
                     Toast.makeText(context, "Sukses", Toast.LENGTH_SHORT).show()
                 } else {
                     // Tangani kesalahan dari API
-                    Log.e("ApiResponse", "Error: ${response.errorBody()?.string()}")
+//                    Log.e("ApiResponse", "Error: ${response.errorBody()?.string()}")
 
                     // Tampilkan pesan kesalahan kepada pengguna, misalnya dengan Toast
                     Toast.makeText(context, "Opps, login gagal", Toast.LENGTH_SHORT).show()
@@ -139,7 +139,7 @@ fun checkCredentials(creds: Credentials, context: Context): Boolean {
             }
 
             override fun onFailure(call: Call<AuthResponse>, t: Throwable) {
-                Log.e("ApiResponse", "Error: ${t.message}")
+//                Log.e("ApiResponse", "Error: ${t.message}")
             }
         })
         return true
